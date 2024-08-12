@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <award_category name="master_of_messy_exams">
+        <organization name="NTA" upvotes="0" />
+        <organization name="CBSE" upvotes="0" />
+        <organization name="CSIR" upvotes="0" />
+        <organization name="UGC" upvotes="0" />
+        <organization name="IBPS" upvotes="0" />
+        <organization name="SSC" upvotes="0" />
+        <organization name="UPSC" upvotes="0" />
+        <organization name="AICTE" upvotes="0" />
+        <organization name="NEET" upvotes="0" />
+        <organization name="JEE" upvotes="0" />
+    </award_category>
+</resources>
