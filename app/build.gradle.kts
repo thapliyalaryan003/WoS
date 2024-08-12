@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -85,6 +86,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -99,5 +101,7 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.2")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.2.0")
-
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-database")
 }

@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.wallofshame" />
+                  <option name="mobileSdkAppId" value="1:541015461541:android:ed89661007462e8caac74c" />
+                  <option name="projectId" value="wallofshame-16717" />
+                  <option name="projectNumber" value="541015461541" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

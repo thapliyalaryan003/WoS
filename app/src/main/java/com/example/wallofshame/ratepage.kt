@@ -3,7 +3,6 @@ package com.example.wallofshame
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -29,17 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
-import androidx.lifecycle.lifecycleScope
 import com.google.ai.client.generativeai.GenerativeModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 
-data class Organization(val name: String, var upvotes: Int = 0 )
+data class Organization(val name: String, var upvotes: Int = 0, var hasUpvoted:Boolean, var hadDownvoted:Boolean)
 class ratepage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,16 +113,16 @@ fun UpvoteScreen() {
     val organizations = remember {
         mutableStateOf(
             listOf(
-                Organization("NTA", 0), // National Testing Agency
-                Organization("CBSE", 0), // Central Board of Secondary Education
-                Organization("CSIR", 0), // Council of Scientific and Industrial Research
-                Organization("UGC", 0), // University Grants Commission
-                Organization("IBPS", 0), // Institute of Banking Personnel Selection
-                Organization("SSC", 0), // Staff Selection Commission
-                Organization("UPSC", 0), // Union Public Service Commission
-                Organization("AICTE", 0), // All India Council for Technical Education
-                Organization("NEET", 0), // National Eligibility cum Entrance Test
-                Organization("JEE", 0),
+                Organization("NTA", 0,false,false), // National Testing Agency
+                Organization("CBSE", 0,false,false), // Central Board of Secondary Education
+                Organization("CSIR", 0,false,false), // Council of Scientific and Industrial Research
+                Organization("UGC", 0,false,false), // University Grants Commission
+                Organization("IBPS", 0,false,false), // Institute of Banking Personnel Selection
+                Organization("SSC", 0,false,false), // Staff Selection Commission
+                Organization("UPSC", 0,false,false), // Union Public Service Commission
+                Organization("AICTE", 0,false,false), // All India Council for Technical Education
+                Organization("NEET", 0,false,false), // National Eligibility cum Entrance Test
+                Organization("JEE", 0,false,false),
                 // ... more organizations
             )
         )
@@ -154,14 +149,26 @@ fun UpvoteScreen() {
                         modifier = Modifier,
                         fontSize = 20.sp,
                         )
-                    Button(onClick = { org.upvotes++
+                    Button(onClick = {
+                        if(!org.hasUpvoted){org.upvotes++
                     sortOrganizations(organizations)
-
+                        org.hasUpvoted = true
+                        org.hadDownvoted = false}
+                        else if(!org.hasUpvoted && org.hadDownvoted){org.upvotes+= 2
+                            sortOrganizations(organizations)
+                        org.hasUpvoted = true
+                        org.hadDownvoted = false}
                     }) {
                         Image(painter = painterResource(id = R.drawable.upvote), contentDescription = "Upvote")
                     }
-                    Button(onClick = { org.upvotes--
+                    Button(onClick = { if(!org.hadDownvoted){org.upvotes--
                         sortOrganizations(organizations)
+                        org.hadDownvoted = true
+                        org.hasUpvoted = false}
+                    else if(org.hasUpvoted && !org.hadDownvoted){org.upvotes-= 2
+                        sortOrganizations(organizations)
+                        org.hasUpvoted = false
+                        org.hadDownvoted = true}
                         }) {
                         Image(painter = painterResource(id = R.drawable.downvote), contentDescription = "Downvote")
                     }

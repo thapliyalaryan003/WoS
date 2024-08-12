@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "541015461541",
+    "project_id": "wallofshame-16717",
+    "storage_bucket": "wallofshame-16717.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:541015461541:android:ed89661007462e8caac74c",
+        "android_client_info": {
+          "package_name": "com.example.wallofshame"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFUhEXL30Xubru4cdgcvYwPDpWEEDQTNw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
