@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
+
 }
 
 android {
@@ -95,13 +96,14 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     // add the dependency for the Google AI client SDK for Android
-    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.2")
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.2.0")
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    //backend dependencies
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-database")
+
+
+
+
 }

@@ -1,8 +1,10 @@
 package com.example.wallofshame
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -19,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,14 +35,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.runBlocking
 
-data class Organization(val name: String, var upvotes: Int = 0, var hasUpvoted:Boolean, var hadDownvoted:Boolean)
+data class Organization(val name: String= "", var upvotes: Int = 0, var hasUpvoted:Boolean, var hadDownvoted:Boolean) {
+    // Add an empty public constructor
+    constructor() : this("",0, false, false)  // This calls the primary constructor with default values
+}
 class ratepage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var awardCategory = intent.getStringExtra("award_category") ?: "Default Category"
         awardCategory = trimString(inputString = awardCategory)
+
         setContent {
             AwardCategoryScreen(awardCategory, context = this) // Replace with actual award category
         }
@@ -57,9 +66,25 @@ fun trimString(inputString: String): String {
 fun sortOrganizations(organizations: MutableState<List<Organization>>) {
     organizations.value = organizations.value.sortedByDescending { it.upvotes }.toMutableStateList()
 }
+fun fetchOrganizations(db: FirebaseFirestore, onFetched: (List<Organization>) -> Unit) {
+    db.collection("organizations")
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+            val organizations = querySnapshot.documents.mapNotNull { doc ->
+                doc.toObject(Organization::class.java) ?: null
+            }
+            Log.d("FetchOrganizations", "Fetched organizations: $organizations")
+            onFetched(organizations) // Pass a read-only list to the callback
+        }
+        .addOnFailureListener { e ->
+            Log.e("FetchOrganizations", "Error fetching organizations", e)
+            onFetched(emptyList())
+        }
+}
 
 @Composable
 fun AwardCategoryScreen(awardCategory: String, context: Context) {
+
     Column(
         modifier = Modifier
             .padding(all = 16.dp)
@@ -97,7 +122,7 @@ fun AwardCategoryScreen(awardCategory: String, context: Context) {
     { Text(text = "AI Truth Check",
                 modifier = Modifier)
         }
-        UpvoteScreen()
+        UpvoteScreen(context)
         Spacer(modifier = Modifier.height(8.dp))
 
 
@@ -109,27 +134,29 @@ fun openNewWindow(response: String?,context: Context) {
     startActivity(context,intent,null)
 }
 @Composable
-fun UpvoteScreen() {
-    val organizations = remember {
-        mutableStateOf(
-            listOf(
-                Organization("NTA", 0,false,false), // National Testing Agency
-                Organization("CBSE", 0,false,false), // Central Board of Secondary Education
-                Organization("CSIR", 0,false,false), // Council of Scientific and Industrial Research
-                Organization("UGC", 0,false,false), // University Grants Commission
-                Organization("IBPS", 0,false,false), // Institute of Banking Personnel Selection
-                Organization("SSC", 0,false,false), // Staff Selection Commission
-                Organization("UPSC", 0,false,false), // Union Public Service Commission
-                Organization("AICTE", 0,false,false), // All India Council for Technical Education
-                Organization("NEET", 0,false,false), // National Eligibility cum Entrance Test
-                Organization("JEE", 0,false,false),
-                // ... more organizations
-            )
-        )
+fun UpvoteScreen(context: Context){
+    FirebaseApp.initializeApp(context)
+    val db = FirebaseFirestore.getInstance()
+
+    val organizations = remember { mutableStateOf<List<Organization>>(emptyList()) }
+    val isLoading = remember { mutableStateOf(true) } // Add a loading state
+
+    // Fetch organizations from Firestore
+    LaunchedEffect(key1 = Unit) {
+        fetchOrganizations(db) { fetchedOrganizations ->
+            organizations.value = fetchedOrganizations
+            isLoading.value = false
+        }
     }
+
     // Initialize organizations with data
-    LazyColumn {
-        items(organizations.value) { org ->
+    if (isLoading.value) {
+        // Show a loading indicator while data is being fetched
+        Text("Loading...")
+    } else {
+        // Display the LazyColumn when data is available
+        LazyColumn {
+            items(organizations.value) { org ->
 
             Row(
                 modifier = Modifier
@@ -150,33 +177,44 @@ fun UpvoteScreen() {
                         fontSize = 20.sp,
                         )
                     Button(onClick = {
-                        if(!org.hasUpvoted){org.upvotes++
-                    sortOrganizations(organizations)
-                        org.hasUpvoted = true
-                        org.hadDownvoted = false}
-                        else if(!org.hasUpvoted && org.hadDownvoted){org.upvotes+= 2
+
+                        if(!org.hasUpvoted && org.hadDownvoted){org.upvotes+= 2
                             sortOrganizations(organizations)
                         org.hasUpvoted = true
                         org.hadDownvoted = false}
+                        else if(!org.hasUpvoted){org.upvotes++
+                            sortOrganizations(organizations)
+                            org.hasUpvoted = true
+                            org.hadDownvoted = false}
                     }) {
                         Image(painter = painterResource(id = R.drawable.upvote), contentDescription = "Upvote")
                     }
-                    Button(onClick = { if(!org.hadDownvoted){org.upvotes--
-                        sortOrganizations(organizations)
-                        org.hadDownvoted = true
-                        org.hasUpvoted = false}
-                    else if(org.hasUpvoted && !org.hadDownvoted){org.upvotes-= 2
+                    Button(onClick = { if(org.hasUpvoted && !org.hadDownvoted){org.upvotes-= 2
                         sortOrganizations(organizations)
                         org.hasUpvoted = false
                         org.hadDownvoted = true}
+                    else if(!org.hadDownvoted){org.upvotes--
+                        sortOrganizations(organizations)
+                        org.hadDownvoted = true
+                        org.hasUpvoted = false}
+
                         }) {
                         Image(painter = painterResource(id = R.drawable.downvote), contentDescription = "Downvote")
                     }
                 }
             }
-        }}}
+        }
+        organizations.value.forEach { org ->db.collection("organizations")
+            .document(org.name) // Use the organization name as the document ID
+            .set(org)
+            .addOnSuccessListener {
+                Log.d(TAG, "Organization ${org.name} added/updated successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error adding/updating organization ${org.name}", e)
+            }
+        } }
+        }
 
-    fun sortOrganizations(organizations: MutableList<Organization>) {
-        organizations.sortByDescending { it.upvotes }
-    }
+   }
 
